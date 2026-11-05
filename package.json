@@ -1,0 +1,72 @@
+{
+  "name": "@toyyib/sdk",
+  "version": "0.0.0",
+  "description": "TypeScript client for the Toyyib Shariah screening API",
+  "license": "MIT",
+  "author": "Halcore Digital Technology Limited",
+  "homepage": "https://github.com/halcore/toyyib-node#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halcore/toyyib-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/halcore/toyyib-node/issues"
+  },
+  "keywords": [
+    "toyyib",
+    "shariah",
+    "halal",
+    "islamic-finance",
+    "stocks",
+    "ngx",
+    "sdk"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "tsc -p tsconfig.json && tsc -p test/tsconfig.json",
+    "check:dist": "node scripts/check-dist.mjs && node scripts/check-dist.cjs"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10",
+    "tsup": "^9.0.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.1.0"
+  }
+}

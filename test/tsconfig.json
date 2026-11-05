@@ -1,0 +1,8 @@
+{
+  // Tests and tooling run on Node, so they get Node's types.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["../src", ".", "../*.ts"]
+}
