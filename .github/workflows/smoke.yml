@@ -1,0 +1,24 @@
+name: Sandbox smoke test
+
+# Calls every endpoint once with the sandbox key. Run it by hand, for example
+# before a release.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/smoke.mjs
+        env:
+          TOYYIB_API_KEY: ${{ secrets.TOYYIB_SANDBOX_KEY }}
