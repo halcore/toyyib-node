@@ -65,6 +65,20 @@ describe('errorFromResponse', () => {
     expect((err as RateLimitError).retryAfter).toBeNull();
   });
 
+  it('gives RateLimitError the retryAfter it is passed', () => {
+    const err = errorFromResponse(429, envelope('THROTTLED', 'Slow down.'), 30);
+    expect((err as RateLimitError).retryAfter).toBe(30);
+  });
+
+  it('keeps a 429 that is not the error envelope a RateLimitError', () => {
+    const html = '<html>Too Many Requests</html>';
+    const err = errorFromResponse(429, html, 5);
+    expect(err).toBeInstanceOf(RateLimitError);
+    expect(err.code).toBe('RATE_LIMITED');
+    expect(err.details).toBe(html);
+    expect((err as RateLimitError).retryAfter).toBe(5);
+  });
+
   it('keeps an unknown code as a plain ToyyibError', () => {
     const err = errorFromResponse(418, envelope('TEAPOT', "I'm a teapot."));
     expect(err.constructor).toBe(ToyyibError);

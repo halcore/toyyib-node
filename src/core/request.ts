@@ -3,11 +3,13 @@ import {
   ConnectionError,
   errorFromResponse,
   maskKey,
+  RateLimitError,
   TimeoutError,
-  type ToyyibError,
+  ToyyibError,
   unexpectedResponse,
 } from './errors';
 import type { ResolvedOptions } from './options';
+import { isRetryable, parseRetryAfter, retryDelayMs } from './retry';
 
 export interface RequestOptions {
   method: 'GET' | 'POST';
@@ -22,23 +24,28 @@ export interface RequestOptions {
 interface Reply {
   status: number;
   body: unknown;
+  /** Seconds from the `Retry-After` header, or `null`. */
+  retryAfter: number | null;
 }
 
 /**
  * The only code that calls `fetch`. It unwraps the API's `{ success, data }`
- * envelope and turns every failure into a `ToyyibError`. The key lives in a
- * private field, so logging or serialising a Transport never shows it.
+ * envelope, turns every failure into a `ToyyibError` and retries the ones
+ * worth retrying. The key lives in a private field, so logging or serialising
+ * a Transport never shows it.
  */
 export class Transport {
   readonly #apiKey: string;
   readonly #baseURL: string;
   readonly #timeout: number;
+  readonly #maxRetries: number;
   readonly #fetch: typeof fetch;
 
   constructor(options: ResolvedOptions) {
     this.#apiKey = options.apiKey;
     this.#baseURL = options.baseURL.replace(/\/+$/, '');
     this.#timeout = options.timeout;
+    this.#maxRetries = options.maxRetries;
     this.#fetch = options.fetch;
   }
 
@@ -54,17 +61,33 @@ export class Transport {
       body = JSON.stringify(opts.body);
     }
 
-    const reply = await this.#attempt(this.#url(opts.path, opts.query), {
-      method: opts.method,
-      headers,
-      body,
-    });
+    const url = this.#url(opts.path, opts.query);
+    const init = { method: opts.method, headers, body };
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.#attempt<T>(url, init);
+      } catch (err) {
+        if (!(err instanceof ToyyibError)) throw err;
+        if (attempt > this.#maxRetries || !isRetryable(err)) throw err;
+        const retryAfter =
+          err instanceof RateLimitError ? err.retryAfter : null;
+        await sleep(retryDelayMs(attempt, retryAfter));
+      }
+    }
+  }
 
+  /** One try: returns the reply's data or throws its error. */
+  async #attempt<T>(url: string, init: RequestInit): Promise<T> {
+    const reply = await this.#fetchReply(url, init);
     if (reply.status >= 200 && reply.status < 300) {
       if (isSuccess(reply.body)) return reply.body.data as T;
       throw unexpectedResponse(reply.status, this.#redact(reply.body));
     }
-    throw errorFromResponse(reply.status, this.#redact(reply.body));
+    throw errorFromResponse(
+      reply.status,
+      this.#redact(reply.body),
+      reply.retryAfter,
+    );
   }
 
   #url(path: string, query: RequestOptions['query'] = {}): string {
@@ -75,8 +98,8 @@ export class Transport {
     return url.toString();
   }
 
-  /** One request, with its own timeout covering the reply's body too. */
-  async #attempt(url: string, init: RequestInit): Promise<Reply> {
+  /** One fetch, with its own timeout covering the reply's body too. */
+  async #fetchReply(url: string, init: RequestInit): Promise<Reply> {
     const controller = new AbortController();
     let timedOut = false;
     const timer = setTimeout(() => {
@@ -92,6 +115,7 @@ export class Transport {
       return {
         status: response.status,
         body: parseBody(await response.text()),
+        retryAfter: parseRetryAfter(response.headers.get('Retry-After')),
       };
     } catch (err) {
       throw this.#noReplyError(err, timedOut);
@@ -128,6 +152,10 @@ export class Transport {
     copy.name = err.name;
     return copy;
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function parseBody(text: string): unknown {

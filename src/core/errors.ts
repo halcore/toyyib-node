@@ -112,9 +112,25 @@ export function unexpectedResponse(status: number, body: unknown): APIError {
   );
 }
 
-/** Builds the error for a non-2xx reply from its status and parsed body. */
-export function errorFromResponse(status: number, body: unknown): ToyyibError {
-  if (!isErrorEnvelope(body)) return unexpectedResponse(status, body);
+/**
+ * Builds the error for a non-2xx reply from its status and parsed body.
+ * `retryAfter` is the parsed `Retry-After` header, used by 429s.
+ */
+export function errorFromResponse(
+  status: number,
+  body: unknown,
+  retryAfter: number | null = null,
+): ToyyibError {
+  if (!isErrorEnvelope(body)) {
+    // A proxy's 429 is still a rate limit, so it keeps its class and is retried.
+    if (status === 429) {
+      return new RateLimitError(
+        'Too many requests to the Toyyib API (HTTP 429).',
+        { status, code: 'RATE_LIMITED', details: body, retryAfter },
+      );
+    }
+    return unexpectedResponse(status, body);
+  }
 
   const { code, message, details } = body.error;
   const init = { status, code, details };
@@ -132,7 +148,9 @@ export function errorFromResponse(status: number, body: unknown): ToyyibError {
   if (status === 400 || status === 422) {
     return new ValidationError(message, init);
   }
-  if (status === 429) return new RateLimitError(message, init);
+  if (status === 429) {
+    return new RateLimitError(message, { ...init, retryAfter });
+  }
   if (status >= 500) return new APIError(message, init);
   return new ToyyibError(message, init);
 }
