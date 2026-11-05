@@ -231,6 +231,58 @@ describe('Transport timeouts and connection errors', () => {
     expect(err.code).toBe('CONNECTION_ERROR');
     expect(err.cause).toBe(cause);
   });
+
+  // Node's fetch only says "fetch failed"; the reason is a code on its cause.
+  it.each([
+    [
+      'a refused connection',
+      new TypeError('fetch failed', {
+        cause: Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:8000'), {
+          code: 'ECONNREFUSED',
+        }),
+      }),
+      'Could not reach the Toyyib API: fetch failed (ECONNREFUSED)',
+    ],
+    [
+      'a host with several addresses, all refused',
+      new TypeError('fetch failed', {
+        cause: Object.assign(new AggregateError([], ''), {
+          code: 'ECONNREFUSED',
+        }),
+      }),
+      'Could not reach the Toyyib API: fetch failed (ECONNREFUSED)',
+    ],
+    [
+      'an unknown host',
+      new TypeError('fetch failed', {
+        cause: Object.assign(
+          new Error('getaddrinfo ENOTFOUND api.toyyib.app'),
+          { code: 'ENOTFOUND' },
+        ),
+      }),
+      'Could not reach the Toyyib API: fetch failed (ENOTFOUND)',
+    ],
+    [
+      'a code already in the message',
+      Object.assign(new Error('request failed: connect ECONNREFUSED'), {
+        code: 'ECONNREFUSED',
+      }),
+      'Could not reach the Toyyib API: request failed: connect ECONNREFUSED',
+    ],
+    [
+      'no code',
+      new TypeError('fetch failed'),
+      'Could not reach the Toyyib API: fetch failed',
+    ],
+  ])('gives the reason in the message for %s', async (_, cause, message) => {
+    const { fetch } = fakeFetch([cause]);
+    const err = await rejectionOf(
+      makeTransport(fetch).request({ method: 'GET', path: 'usage' }),
+    );
+    expect(err).toBeInstanceOf(ConnectionError);
+    expect(err.message).toBe(message);
+    expect(err.cause).toBe(cause);
+  });
 });
 
 describe('Transport never shows the key', () => {

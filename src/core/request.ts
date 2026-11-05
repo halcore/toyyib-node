@@ -131,7 +131,11 @@ export class Transport {
         { code: 'TIMEOUT', cause: err },
       );
     }
-    const reason = err instanceof Error ? err.message : String(err);
+    let reason = err instanceof Error ? err.message : String(err);
+    const code = networkCode(err);
+    if (code !== undefined && !reason.includes(code)) {
+      reason = `${reason} (${code})`;
+    }
     return new ConnectionError(
       this.#redact(`Could not reach the Toyyib API: ${reason}`),
       { code: 'CONNECTION_ERROR', cause: this.#redactCause(err) },
@@ -174,6 +178,20 @@ function isSuccess(body: unknown): body is { data: unknown } {
     (body as { success?: unknown }).success === true &&
     'data' in body
   );
+}
+
+/**
+ * Node's fetch fails with "fetch failed" and puts the reason, such as
+ * ECONNREFUSED or ENOTFOUND, in a `code` on a cause a level or two down.
+ */
+function networkCode(err: unknown): string | undefined {
+  let current = err;
+  for (let depth = 0; depth < 4 && current instanceof Object; depth++) {
+    const { code, cause } = current as { code?: unknown; cause?: unknown };
+    if (typeof code === 'string') return code;
+    current = cause;
+  }
+  return undefined;
 }
 
 function replaceKey(value: unknown, key: string, masked: string): unknown {
