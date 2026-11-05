@@ -2,6 +2,7 @@ dist/
 coverage/
 package-lock.json
 CHANGELOG.md
+.release-please-manifest.json
 src/generated/
 docs/
 openapi/
