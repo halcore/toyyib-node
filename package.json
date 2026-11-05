@@ -50,7 +50,7 @@
     "test": "vitest run",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
-    "typecheck": "tsc -p tsconfig.json && tsc -p test/tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json && tsc -p test/tsconfig.json && tsc -p examples",
     "check:dist": "node scripts/check-dist.mjs && node scripts/check-dist.cjs",
     "generate": "node scripts/generate.mjs"
   },

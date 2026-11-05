@@ -1,0 +1,9 @@
+{
+  // Type-checks the examples against the source, as a user would import it.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": { "@toyyib/sdk": ["../src/index.ts"] }
+  },
+  "include": ["."]
+}
