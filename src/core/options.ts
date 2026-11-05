@@ -47,15 +47,34 @@ export function resolveOptions(options: ClientOptions = {}): ResolvedOptions {
     );
   }
 
+  const baseURL = options.baseURL ?? DEFAULT_BASE_URL;
+  if (!isHttpURL(baseURL)) {
+    throw new ToyyibError(
+      '`baseURL` must be an absolute http or https URL, such as https://api.toyyib.app/api/v1.',
+      { code: 'INVALID_BASE_URL' },
+    );
+  }
+
   return {
     apiKey,
-    baseURL: options.baseURL ?? DEFAULT_BASE_URL,
+    baseURL,
     timeout: options.timeout ?? DEFAULT_TIMEOUT_MS,
     maxRetries: options.maxRetries ?? DEFAULT_MAX_RETRIES,
     // Calls the global at request time: a stored, unbound fetch throws
     // "Illegal invocation" in browsers and Cloudflare Workers.
     fetch: options.fetch ?? ((input, init) => globalThis.fetch(input, init)),
   };
+}
+
+// `new URL('localhost:8000')` parses, with `localhost:` as the scheme, so the
+// scheme is checked too.
+function isHttpURL(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === 'https:' || protocol === 'http:';
+  } catch {
+    return false;
+  }
 }
 
 /** `sk_test_` keys are sandbox and `sk_live_` keys are live. The server rejects anything else. */

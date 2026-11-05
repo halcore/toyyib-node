@@ -73,6 +73,23 @@ describe('resolveOptions', () => {
     ).toBe('sk_test_x');
   });
 
+  it.each(['not a url', 'api.toyyib.app/api/v1', 'localhost:8000/api/v1'])(
+    'throws INVALID_BASE_URL for %j',
+    (baseURL) => {
+      const err = thrownBy(() =>
+        resolveOptions({ apiKey: 'sk_test_x', baseURL }),
+      );
+      expect(err.code).toBe('INVALID_BASE_URL');
+    },
+  );
+
+  it('accepts an http baseURL for a local server', () => {
+    const baseURL = 'http://localhost:8000/api/v1';
+    expect(resolveOptions({ apiKey: 'sk_test_x', baseURL }).baseURL).toBe(
+      baseURL,
+    );
+  });
+
   it('uses the defaults', () => {
     const resolved = resolveOptions({ apiKey: 'sk_test_x' });
     expect(resolved.baseURL).toBe(DEFAULT_BASE_URL);
