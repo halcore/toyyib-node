@@ -2,6 +2,7 @@ name: Release
 
 # release-please keeps a release PR up to date from the Conventional Commits on
 # main. Merging that PR tags the release, and the publish job sends it to npm.
+# CONTRIBUTING.md describes the first release, which needs an npm token once.
 on:
   push:
     branches: [main]
@@ -41,16 +42,21 @@ jobs:
     permissions:
       contents: read
       # npm trusted publishing: npm exchanges this job's OIDC token for a
-      # short-lived publish token, so there's no NPM_TOKEN secret.
+      # short-lived publish token.
       id-token: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          # Node 24 bundles npm 11, which trusted publishing needs.
+          # Trusted publishing needs npm 11.5.1 or newer; Node 24 bundles it.
           node-version: 24
           registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm test
       - run: npm run build
       - run: npm publish --provenance --access public
+        env:
+          # Only for the very first release: a trusted publisher can only be
+          # added once the package exists. npm tries trusted publishing first
+          # and falls back to this token. Delete the secret afterwards.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

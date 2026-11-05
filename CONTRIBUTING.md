@@ -47,3 +47,14 @@ This reads the live schema. To use a local file instead, set `TOYYIB_SCHEMA_URL=
 Open a pull request against `main`. A maintainer reviews every one, and CI must pass before it's merged.
 
 To report a security problem, don't open an issue: see [SECURITY.md](SECURITY.md).
+
+## Releasing
+
+Maintainers only. [release-please](https://github.com/googleapis/release-please) keeps a release PR open with the next version and its changelog, worked out from the commit messages. Merging that PR tags the release, and `.github/workflows/release.yml` publishes it to npm with provenance, using npm trusted publishing.
+
+The first release needs one extra step, because npm can only add a trusted publisher to a package that already exists:
+
+1. On npmjs.com, create a granular access token that can publish to the `@toyyib` scope, with a short expiry. Save it as this repo's `NPM_TOKEN` Actions secret.
+2. Merge the release PR. The workflow publishes `0.1.0` with the token.
+3. In the package's settings on npmjs.com, add a trusted publisher: GitHub Actions, organisation `halcore`, repository `toyyib-node`, workflow `release.yml`.
+4. Delete the `NPM_TOKEN` secret and revoke the token. Later releases use trusted publishing only.
