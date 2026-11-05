@@ -175,12 +175,23 @@ const toyyib = new Toyyib({
 
 Node 18 or newer, Bun, Deno, and edge runtimes such as Cloudflare Workers and Vercel. The client uses the built-in `fetch` and has no dependencies.
 
+The key is read from `process.env.TOYYIB_API_KEY`, or from `Deno.env` in Deno, which needs `--allow-env=TOYYIB_API_KEY`. Cloudflare Workers hand secrets to your handler on `env` and don't always copy them to `process.env`, so pass the key in yourself:
+
+```ts
+export default {
+  async fetch(request: Request, env: { TOYYIB_API_KEY: string }) {
+    const toyyib = new Toyyib({ apiKey: env.TOYYIB_API_KEY });
+    return Response.json(await toyyib.usage());
+  },
+};
+```
+
 **Server-side only.** An API key in a browser page or a mobile app can be read by anyone who has it, so the client refuses to start there. If you accept that risk, pass `dangerouslyAllowBrowser: true`.
 
 ## Links
 
 - API reference: https://api.toyyib.app/api/v1/docs/
-- [Examples](examples/)
+- [Examples](examples/): TypeScript files that Node 22.18 or newer runs directly. Run `npm run build` first. On older Node versions, use a TypeScript runner such as tsx.
 - [Contributing](CONTRIBUTING.md) and [security](SECURITY.md)
 
 ## Licence

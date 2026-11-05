@@ -1,5 +1,7 @@
 // Screens a portfolio: its overall verdict, and how much income to purify.
 //
+// Needs Node 22.18 or newer, which runs .ts files directly (or use tsx).
+//
 //   npm run build
 //   TOYYIB_API_KEY=sk_test_... node examples/screen-portfolio.ts
 import { Toyyib } from '@toyyib/sdk';

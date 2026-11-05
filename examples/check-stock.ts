@@ -1,5 +1,7 @@
 // Checks one stock's Shariah compliance, then lists the compliant stocks.
 //
+// Needs Node 22.18 or newer, which runs .ts files directly (or use tsx).
+//
 //   npm run build
 //   TOYYIB_API_KEY=sk_test_... node examples/check-stock.ts
 import { ConflictError, Toyyib } from '@toyyib/sdk';
