@@ -19,6 +19,8 @@ export type FilingRatios = Schemas['FilingRatios'];
 
 /** A screened filing. */
 export type Filing = Schemas['FilingResultSummary'];
+/** A security's screened filings, newest first. */
+export type FilingHistory = Schemas['FilingHistory'];
 export type FilingInputs = Schemas['FilingInputsResponse'];
 export type FilingInput = Schemas['FilingInput'];
 export type FilingEvidence = Schemas['FilingEvidence'];

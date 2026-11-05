@@ -6,6 +6,7 @@ import type {
   ETFCompliance,
   Filing,
   FilingEvidence,
+  FilingHistory,
   FilingInputs,
   PortfolioAnalysis,
   PortfolioHolding,
@@ -42,6 +43,7 @@ describe('friendly types', () => {
     expectTypeOf<Filing['id']>().toEqualTypeOf<string>();
     expectTypeOf<FilingInputs['filing']>().toEqualTypeOf<Filing>();
     expectTypeOf<FilingEvidence>().toHaveProperty('inputs');
+    expectTypeOf<FilingHistory['items']>().toEqualTypeOf<Filing[]>();
 
     expectTypeOf<Region>().toHaveProperty('code');
     expectTypeOf<Report>().toHaveProperty('download_url');

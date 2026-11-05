@@ -132,3 +132,15 @@ export function pagePromise<P extends AsyncIterable<T>, T>(
     },
   });
 }
+
+/**
+ * A cursor-paged list: fetches the first page now and later pages on demand.
+ * `fetchPage` gets the `next_token` to send, or `undefined` for the first page.
+ */
+export function cursorList<T>(
+  fetchPage: (nextToken?: string) => Promise<CursorReply<T>>,
+): PagePromise<CursorPage<T>, T> {
+  return pagePromise<CursorPage<T>, T>(
+    async () => new CursorPage(fetchPage, await fetchPage()),
+  );
+}
