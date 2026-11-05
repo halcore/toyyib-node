@@ -20,7 +20,11 @@ console.log(
     `${summary.compliant_percentage}% compliant by value`,
 );
 for (const holding of holdings) {
-  const purify = holding.purification_amount ?? 'not available yet';
+  // A non-compliant holding is sold, not purified, so it has no amount.
+  const purify =
+    holding.compliance_status === 'non_compliant'
+      ? 'nothing: sell it instead'
+      : (holding.purification_amount ?? 'not available yet');
   console.log(
     `  ${holding.ticker}: ${holding.compliance_status}, purify ${purify}`,
   );
