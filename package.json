@@ -1,6 +1,6 @@
 {
   "name": "@toyyib/sdk",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "TypeScript client for the Toyyib Shariah screening API",
   "license": "MIT",
   "author": "Halcore Digital Technology Limited",
