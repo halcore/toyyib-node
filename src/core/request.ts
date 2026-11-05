@@ -171,7 +171,8 @@ function isSuccess(body: unknown): body is { data: unknown } {
   return (
     typeof body === 'object' &&
     body !== null &&
-    (body as { success?: unknown }).success === true
+    (body as { success?: unknown }).success === true &&
+    'data' in body
   );
 }
 

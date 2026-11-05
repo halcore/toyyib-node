@@ -90,6 +90,7 @@ describe('Transport requests', () => {
   it.each([
     ['no success flag', { data: { a: 1 } }],
     ['success false', { success: false, data: { a: 1 } }],
+    ['success but no data', { success: true, message: 'ok' }],
     ['not JSON', '<html>OK</html>'],
     ['empty', undefined],
   ])('throws APIError for a 2xx body with %s', async (_, body) => {
