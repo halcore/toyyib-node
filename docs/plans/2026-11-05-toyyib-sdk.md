@@ -78,20 +78,14 @@ toyyib-node/
 
 ---
 
-### Task 0: Server fix: keep the code an error was raised with (repo `halcore/stock_screener_server`)
+### Task 0: Server fix: return `PRODUCTION_ACCESS_DISABLED`
 
-**Files:**
-- Modify: `api/utils.py`, function `custom_exception_handler`
-- Test: `api/tests.py`, new test case
+This change is made and reviewed in the API server's own repository. Nothing in this repository changes.
 
 **Interfaces:**
-- Produces: a 401 reply `{"success": false, "error": {"code": "PRODUCTION_ACCESS_DISABLED", …}}` for a live key whose business has `production_access_enabled = False`. Task 1's `ProductionAccessDisabledError` relies on it.
+- Produces: a 401 reply `{"success": false, "error": {"code": "PRODUCTION_ACCESS_DISABLED", …}}` for a live key whose production access isn't switched on yet. Task 3's `ProductionAccessDisabledError` relies on it.
 
-- [ ] **Step 1: Write the failing test** `test_production_access_disabled_keeps_its_code`. Create a business with `production_access_enabled=False` and a production key on an active plan. Call `GET /api/v1/usage` with `X-API-Key`, then assert `status_code == 401` and `response.json()["error"]["code"] == "PRODUCTION_ACCESS_DISABLED"`.
-- [ ] **Step 2: Run** `python manage.py test api.tests` and expect it to fail with `'AUTHENTICATION_FAILED' != 'PRODUCTION_ACCESS_DISABLED'`.
-- [ ] **Step 3: Implement.** In `custom_exception_handler`, when `exc.get_codes()` returns a `str`, use it as the code. Otherwise keep `getattr(exc, 'default_code', 'error')`. Upper-case either way. Dict details, as from validation errors, keep today's behaviour.
-- [ ] **Step 4: Run** `python manage.py test api` and expect it to pass, with every existing API test still green.
-- [ ] **Step 5: Prepare the commit** `fix(api): keep the error code an exception was raised with`. It goes through that repo's normal PR into `main`, and the library's first release waits until it's deployed.
+- [ ] Fix the server so this reply keeps its specific code instead of the generic `AUTHENTICATION_FAILED`, with a test that calls `GET /api/v1/usage` with such a key. The library's first release waits until the fix is deployed.
 
 ### Task 1: Repository scaffold, tooling and CI
 

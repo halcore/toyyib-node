@@ -144,7 +144,7 @@ The API has a per-minute limit (it asks callers to wait 60 seconds) and a daily 
 
 ## Server change needed first
 
-In the API server, the error handler builds each error's `code` from the exception class's default code. So the code `production_access_disabled`, raised when a live key's business isn't switched on, reaches clients as the generic `AUTHENTICATION_FAILED`. The handler should use the code the exception was raised with. This is a one-line change to the server's error handler, with a test, done through the server's normal review. Until it ships, `ProductionAccessDisabledError` can't be told apart from other 401s, so the library releases after the fix.
+Today the API reports a live key whose production access isn't switched on yet with the generic code `AUTHENTICATION_FAILED`, not `PRODUCTION_ACCESS_DISABLED`. The fix is made and reviewed in the server's own repository. Until it ships, `ProductionAccessDisabledError` can't be told apart from other 401s, so the library releases after the fix.
 
 ## Testing
 
