@@ -51,7 +51,8 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "tsc -p tsconfig.json && tsc -p test/tsconfig.json",
-    "check:dist": "node scripts/check-dist.mjs && node scripts/check-dist.cjs"
+    "check:dist": "node scripts/check-dist.mjs && node scripts/check-dist.cjs",
+    "generate": "node scripts/generate.mjs"
   },
   "publishConfig": {
     "access": "public",
@@ -63,6 +64,7 @@
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.14.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.10",
     "tsup": "^9.0.0",
     "typescript": "^5.9.3",

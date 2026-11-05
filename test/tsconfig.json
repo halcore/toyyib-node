@@ -2,7 +2,9 @@
   // Tests and tooling run on Node, so they get Node's types.
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node"],
+    // Lets tests import the .mjs scripts, typed by their JSDoc.
+    "allowJs": true
   },
   "include": ["../src", ".", "../*.ts"]
 }
