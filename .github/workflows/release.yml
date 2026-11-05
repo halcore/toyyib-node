@@ -15,6 +15,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write # to start CI on the release PR
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
     steps:
@@ -23,6 +24,15 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      # Pushes made with the default token don't trigger workflows, so the
+      # release PR would get no CI checks. A workflow_dispatch does run, and
+      # its checks show on the PR.
+      - name: Run CI on the release PR
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
 
   publish:
     needs: release-please

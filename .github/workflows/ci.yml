@@ -4,6 +4,9 @@ on:
   pull_request:
   push:
     branches: [main]
+  # release.yml starts CI this way on release PRs, which the default token's
+  # pushes don't trigger.
+  workflow_dispatch:
 
 permissions:
   contents: read
