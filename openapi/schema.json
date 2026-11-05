@@ -1,0 +1,2943 @@
+{
+  "components": {
+    "schemas": {
+      "AnalystLine": {
+        "description": "A line an analyst added to an input; it counts towards the input's value.",
+        "properties": {
+          "citation": {
+            "description": "Source the analyst gave.",
+            "type": "string"
+          },
+          "counted_amount": {
+            "description": "Signed amount in the filing's currency (negative when deducted).",
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "treatment": {
+            "$ref": "#/components/schemas/TreatmentEnum"
+          }
+        },
+        "required": [
+          "citation",
+          "counted_amount",
+          "index",
+          "label",
+          "treatment"
+        ],
+        "type": "object"
+      },
+      "BasisEnum": {
+        "description": "* `LINE_ITEM_BREAKDOWN` - LINE_ITEM_BREAKDOWN\n* `STATEMENT_TOTAL` - STATEMENT_TOTAL\n* `NOT_FOUND` - NOT_FOUND\n* `ANALYST_OVERRIDE` - ANALYST_OVERRIDE\n* `NGX_REFERENCE` - NGX_REFERENCE\n* `ANALYST_LINE_ITEMS` - ANALYST_LINE_ITEMS",
+        "enum": [
+          "LINE_ITEM_BREAKDOWN",
+          "STATEMENT_TOTAL",
+          "NOT_FOUND",
+          "ANALYST_OVERRIDE",
+          "NGX_REFERENCE",
+          "ANALYST_LINE_ITEMS"
+        ],
+        "type": "string"
+      },
+      "BlankEnum": {
+        "enum": [
+          ""
+        ]
+      },
+      "BreakdownLine": {
+        "description": "One filing row that makes up an input total.",
+        "properties": {
+          "amount": {
+            "description": "Row amount in full currency units, as printed.",
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "citation": {
+            "type": "string"
+          },
+          "citation_check": {
+            "description": "MATCH: the citation quotes the printed figure. NO_FIGURE: it quotes no amount. MISMATCH: it quotes other figures; check the row. Null when there is no printed figure.\n\n* `MATCH` - MATCH\n* `NO_FIGURE` - NO_FIGURE\n* `MISMATCH` - MISMATCH",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CitationCheckEnum"
+              },
+              {
+                "$ref": "#/components/schemas/NullEnum"
+              }
+            ]
+          },
+          "counted_amount": {
+            "description": "Signed contribution to the total (negative when deducted, 0 when excluded).",
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "edited": {
+            "description": "An analyst corrected this row's counted amount.",
+            "type": "boolean"
+          },
+          "explanation": {
+            "description": "Note wording explaining what the balance is or why it is restricted.",
+            "type": "string"
+          },
+          "label": {
+            "description": "Row label as printed in the filing.",
+            "type": "string"
+          },
+          "line_item": {
+            "description": "Template category, e.g. CASH_AT_BANK or IMPAIRMENT_ALLOWANCE.",
+            "type": "string"
+          },
+          "note": {
+            "description": "Note to the accounts, e.g. Note 18.",
+            "type": "string"
+          },
+          "page": {
+            "description": "Page in the original filing PDF.",
+            "nullable": true,
+            "type": "integer"
+          },
+          "printed": {
+            "description": "Figure as printed in the filing, before scale, e.g. (137,870).",
+            "nullable": true,
+            "type": "string"
+          },
+          "scale": {
+            "description": "Multiplier from the printed figure to full units, e.g. 1000.",
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "source_table": {
+            "type": "string"
+          },
+          "treatment": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TreatmentEnum"
+              }
+            ],
+            "description": "ADDED and DEDUCTED rows reach the total; EXCLUDED rows are shown for transparency only.\n\n* `ADDED` - ADDED\n* `DEDUCTED` - DEDUCTED\n* `EXCLUDED` - EXCLUDED"
+          }
+        },
+        "required": [
+          "amount",
+          "citation",
+          "citation_check",
+          "counted_amount",
+          "currency",
+          "edited",
+          "explanation",
+          "label",
+          "line_item",
+          "note",
+          "page",
+          "printed",
+          "scale",
+          "source_table",
+          "treatment"
+        ],
+        "type": "object"
+      },
+      "BusinessScreenReasonCategoryEnum": {
+        "description": "* `` - \n* `riba_banking` - riba_banking\n* `riba_debt_fund` - riba_debt_fund\n* `alcohol` - alcohol\n* `conventional_insurance` - conventional_insurance\n* `gambling_hospitality` - gambling_hospitality\n* `reit_impermissible` - reit_impermissible\n* `fund_unscreened` - fund_unscreened\n* `conventional_financial_services` - conventional_financial_services\n* `other` - other",
+        "enum": [
+          "riba_banking",
+          "riba_debt_fund",
+          "alcohol",
+          "conventional_insurance",
+          "gambling_hospitality",
+          "reit_impermissible",
+          "fund_unscreened",
+          "conventional_financial_services",
+          "other"
+        ],
+        "type": "string"
+      },
+      "CitationCheckEnum": {
+        "description": "* `MATCH` - MATCH\n* `NO_FIGURE` - NO_FIGURE\n* `MISMATCH` - MISMATCH",
+        "enum": [
+          "MATCH",
+          "NO_FIGURE",
+          "MISMATCH"
+        ],
+        "type": "string"
+      },
+      "ComplianceStatusEnum": {
+        "description": "* `COMPLIANT` - COMPLIANT\n* `NON_COMPLIANT` - NON_COMPLIANT\n* `QUESTIONABLE` - QUESTIONABLE",
+        "enum": [
+          "COMPLIANT",
+          "NON_COMPLIANT",
+          "QUESTIONABLE"
+        ],
+        "type": "string"
+      },
+      "ETFCompliance": {
+        "description": "An ETF's Shariah compliance, derived from its underlying holdings by fund weight.",
+        "properties": {
+          "compliant_holdings": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "exchange": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "non_compliant_holdings": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "questionable_holdings": {
+            "format": "double",
+            "readOnly": true,
+            "type": "number"
+          },
+          "report_date": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ComplianceStatusEnum"
+              }
+            ],
+            "readOnly": true
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "compliant_holdings",
+          "exchange",
+          "name",
+          "non_compliant_holdings",
+          "questionable_holdings",
+          "report_date",
+          "status",
+          "symbol"
+        ],
+        "type": "object"
+      },
+      "ETFCompliancePage": {
+        "description": "One page of ETFs.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ETFCompliance"
+            },
+            "type": "array"
+          },
+          "next_token": {
+            "description": "Cursor for the next page; null on the last page.",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "next_token"
+        ],
+        "type": "object"
+      },
+      "Exchange": {
+        "description": "A market the API covers.",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExchangeTypeEnum"
+              }
+            ],
+            "readOnly": true
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ExchangeList": {
+        "description": "The markets the API covers.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Exchange"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "ExchangeTypeEnum": {
+        "description": "* `EXCHANGE` - EXCHANGE\n* `OTC` - OTC",
+        "enum": [
+          "EXCHANGE",
+          "OTC"
+        ],
+        "type": "string"
+      },
+      "FilingEvidence": {
+        "properties": {
+          "artifact_references": {},
+          "core_pages": {},
+          "fiscal_period": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FiscalPeriodEnum"
+              },
+              {
+                "$ref": "#/components/schemas/BlankEnum"
+              }
+            ]
+          },
+          "fiscal_year": {
+            "maximum": 32767,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
+          "impure_income_denominator": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/FilingInput"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "market_cap": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FilingMarketCap"
+              }
+            ],
+            "nullable": true,
+            "readOnly": true
+          },
+          "methodology_version": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "pass_flags": {},
+          "pdf_sha256": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "provider_usage": {},
+          "public_status": {
+            "maxLength": 20,
+            "type": "string"
+          },
+          "released_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reporting_period_end": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "retry_pages": {},
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2048,
+            "type": "string"
+          },
+          "unresolved_inputs": {},
+          "worker_status": {
+            "$ref": "#/components/schemas/WorkerStatusEnum"
+          }
+        },
+        "required": [
+          "id",
+          "impure_income_denominator",
+          "inputs",
+          "market_cap",
+          "methodology_version",
+          "pdf_sha256",
+          "public_status",
+          "released_at",
+          "source_url",
+          "worker_status"
+        ],
+        "type": "object"
+      },
+      "FilingHistory": {
+        "description": "A security's screened filings, newest first.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FilingResultSummary"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "FilingInput": {
+        "description": "A screening input with its typed line-item breakdown.\n\n``normalization`` is the worker's raw audit record, kept for backward\ncompatibility; prefer ``basis``, ``reconciliation``, ``lines`` and\n``ignored_lines``.  ``include_ignored=True`` in the context fills\n``ignored_lines``; otherwise it is null.",
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "analyst_lines": {
+            "items": {
+              "$ref": "#/components/schemas/AnalystLine"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "basis": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BasisEnum"
+              }
+            ],
+            "readOnly": true
+          },
+          "citation": {
+            "type": "string"
+          },
+          "currency": {
+            "maxLength": 8,
+            "type": "string"
+          },
+          "diagnostic": {
+            "type": "string"
+          },
+          "ignored_lines": {
+            "items": {
+              "$ref": "#/components/schemas/IgnoredLine"
+            },
+            "nullable": true,
+            "readOnly": true,
+            "type": "array"
+          },
+          "key": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "label": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/BreakdownLine"
+            },
+            "readOnly": true,
+            "type": "array"
+          },
+          "normalization": {},
+          "reconciliation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Reconciliation"
+              }
+            ],
+            "nullable": true,
+            "readOnly": true
+          },
+          "reported_label": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "reporting_scale": {
+            "format": "decimal",
+            "pattern": "^-?\\d{0,20}(?:\\.\\d{0,0})?$",
+            "type": "string"
+          },
+          "source_page": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "source_section": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "value": {
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "accepted",
+          "analyst_lines",
+          "basis",
+          "currency",
+          "ignored_lines",
+          "key",
+          "label",
+          "lines",
+          "reconciliation",
+          "reported_label",
+          "reporting_scale"
+        ],
+        "type": "object"
+      },
+      "FilingInputsResponse": {
+        "description": "Documentation shape of GET /stocks/{symbol}/filings/latest/inputs.",
+        "properties": {
+          "filing": {
+            "$ref": "#/components/schemas/FilingResultSummary"
+          },
+          "impure_income_denominator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ImpureIncomeDenominatorEnum"
+              }
+            ],
+            "description": "Input the impure income ratio was divided by.\n\n* `total_income` - total_income\n* `total_revenue` - total_revenue"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/FilingInput"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "filing",
+          "impure_income_denominator",
+          "inputs"
+        ],
+        "type": "object"
+      },
+      "FilingMarketCap": {
+        "properties": {
+          "close_price": {
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,14}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "evidence": {},
+          "price_trade_date": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "shares_used": {
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 40,
+            "type": "string"
+          },
+          "value": {
+            "format": "decimal",
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "value"
+        ],
+        "type": "object"
+      },
+      "FilingRatios": {
+        "description": "A filing's screening ratios, with each screen's limit and result.",
+        "properties": {
+          "debt": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "impure_income": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "impure_income_denominator": {
+            "$ref": "#/components/schemas/ImpureIncomeDenominatorEnum"
+          },
+          "investment": {
+            "description": "Cash and interest-bearing securities / market cap.",
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "pass_flags": {
+            "additionalProperties": {
+              "nullable": true,
+              "type": "boolean"
+            },
+            "type": "object"
+          },
+          "statuses": {
+            "$ref": "#/components/schemas/RatioStatuses"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/RatioThresholds"
+          }
+        },
+        "required": [
+          "debt",
+          "impure_income",
+          "impure_income_denominator",
+          "investment",
+          "pass_flags",
+          "statuses",
+          "thresholds"
+        ],
+        "type": "object"
+      },
+      "FilingResultSummary": {
+        "properties": {
+          "fiscal_period": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FiscalPeriodEnum"
+              },
+              {
+                "$ref": "#/components/schemas/BlankEnum"
+              }
+            ]
+          },
+          "fiscal_year": {
+            "maximum": 32767,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
+          "methodology_version": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "pdf_sha256": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "public_status": {
+            "maxLength": 20,
+            "type": "string"
+          },
+          "released_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reporting_period_end": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "source_url": {
+            "format": "uri",
+            "maxLength": 2048,
+            "type": "string"
+          },
+          "worker_status": {
+            "$ref": "#/components/schemas/WorkerStatusEnum"
+          }
+        },
+        "required": [
+          "id",
+          "methodology_version",
+          "pdf_sha256",
+          "public_status",
+          "released_at",
+          "source_url",
+          "worker_status"
+        ],
+        "type": "object"
+      },
+      "FinancialScreenEnum": {
+        "description": "* `COMPLIANT` - COMPLIANT\n* `NON_COMPLIANT` - NON_COMPLIANT\n* `QUESTIONABLE` - QUESTIONABLE\n* `NOT_APPLICABLE` - NOT_APPLICABLE",
+        "enum": [
+          "COMPLIANT",
+          "NON_COMPLIANT",
+          "QUESTIONABLE",
+          "NOT_APPLICABLE"
+        ],
+        "type": "string"
+      },
+      "FiscalPeriodEnum": {
+        "description": "* `Q1` - Q1\n* `Q2` - Q2\n* `Q3` - Q3\n* `Q4` - Q4\n* `FY` - Full year",
+        "enum": [
+          "Q1",
+          "Q2",
+          "Q3",
+          "Q4",
+          "FY"
+        ],
+        "type": "string"
+      },
+      "HoldingInputRequest": {
+        "properties": {
+          "shares": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "ticker": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "shares",
+          "ticker"
+        ],
+        "type": "object"
+      },
+      "IgnoredLine": {
+        "description": "A row returned by extraction but not counted (subtotal, total, maturity split...).",
+        "properties": {
+          "amount": {
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "citation": {
+            "type": "string"
+          },
+          "citation_check": {
+            "description": "MATCH: the citation quotes the printed figure. NO_FIGURE: it quotes no amount. MISMATCH: it quotes other figures; check the row. Null when there is no printed figure.\n\n* `MATCH` - MATCH\n* `NO_FIGURE` - NO_FIGURE\n* `MISMATCH` - MISMATCH",
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CitationCheckEnum"
+              },
+              {
+                "$ref": "#/components/schemas/NullEnum"
+              }
+            ]
+          },
+          "counted_amount": {
+            "description": "Amount an analyst chose to count from this row, in the filing's currency; null when not counted.",
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "line_item": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "page": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "printed": {
+            "description": "Figure as printed in the filing, before scale, e.g. (137,870).",
+            "nullable": true,
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ReasonEnum"
+          },
+          "reason_detail": {
+            "type": "string"
+          },
+          "scale": {
+            "description": "Multiplier from the printed figure to full units, e.g. 1000.",
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "citation",
+          "citation_check",
+          "counted_amount",
+          "explanation",
+          "label",
+          "line_item",
+          "note",
+          "page",
+          "printed",
+          "reason",
+          "reason_detail",
+          "scale"
+        ],
+        "type": "object"
+      },
+      "ImpureIncomeDenominatorEnum": {
+        "description": "* `total_income` - total_income\n* `total_revenue` - total_revenue",
+        "enum": [
+          "total_income",
+          "total_revenue"
+        ],
+        "type": "string"
+      },
+      "ModeEnum": {
+        "description": "* `sandbox` - sandbox\n* `production` - production",
+        "enum": [
+          "sandbox",
+          "production"
+        ],
+        "type": "string"
+      },
+      "NullEnum": {
+        "enum": [
+          null
+        ]
+      },
+      "PortfolioAnalysis": {
+        "description": "A portfolio's compliance and purification, overall and per holding.",
+        "properties": {
+          "holdings": {
+            "items": {
+              "$ref": "#/components/schemas/PortfolioHoldingResult"
+            },
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PortfolioSummary"
+          }
+        },
+        "required": [
+          "holdings",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "PortfolioAnalyzeRequest": {
+        "properties": {
+          "holdings": {
+            "items": {
+              "$ref": "#/components/schemas/HoldingInputRequest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "holdings"
+        ],
+        "type": "object"
+      },
+      "PortfolioHoldingResult": {
+        "properties": {
+          "company_name": {
+            "type": "string"
+          },
+          "compliance_score": {
+            "description": "Always null; kept for compatibility.",
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "compliance_status": {
+            "$ref": "#/components/schemas/PortfolioStatusEnum"
+          },
+          "financial_year_end": {
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "price": {
+            "format": "double",
+            "type": "number"
+          },
+          "purification_amount": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "purification_per_share": {
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "shares": {
+            "type": "integer"
+          },
+          "ticker": {
+            "type": "string"
+          },
+          "value": {
+            "format": "double",
+            "type": "number"
+          },
+          "weight": {
+            "description": "Percent of the portfolio's value.",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "company_name",
+          "compliance_score",
+          "compliance_status",
+          "financial_year_end",
+          "price",
+          "purification_amount",
+          "purification_per_share",
+          "shares",
+          "ticker",
+          "value",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "PortfolioStatusEnum": {
+        "description": "* `compliant` - compliant\n* `non_compliant` - non_compliant\n* `doubtful` - doubtful\n* `pending` - pending",
+        "enum": [
+          "compliant",
+          "non_compliant",
+          "doubtful",
+          "pending"
+        ],
+        "type": "string"
+      },
+      "PortfolioSummary": {
+        "properties": {
+          "analyzed_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "compliance_score": {
+            "description": "Always null; kept for compatibility.",
+            "format": "double",
+            "nullable": true,
+            "type": "number"
+          },
+          "compliance_status": {
+            "$ref": "#/components/schemas/PortfolioStatusEnum"
+          },
+          "compliant_percentage": {
+            "format": "double",
+            "type": "number"
+          },
+          "compliant_value": {
+            "format": "double",
+            "type": "number"
+          },
+          "doubtful_percentage": {
+            "format": "double",
+            "type": "number"
+          },
+          "doubtful_value": {
+            "format": "double",
+            "type": "number"
+          },
+          "holdings_count": {
+            "type": "integer"
+          },
+          "non_compliant_percentage": {
+            "format": "double",
+            "type": "number"
+          },
+          "non_compliant_value": {
+            "format": "double",
+            "type": "number"
+          },
+          "purification_unavailable_count": {
+            "type": "integer"
+          },
+          "total_purification_amount": {
+            "format": "double",
+            "type": "number"
+          },
+          "total_value": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "analyzed_at",
+          "compliance_score",
+          "compliance_status",
+          "compliant_percentage",
+          "compliant_value",
+          "doubtful_percentage",
+          "doubtful_value",
+          "holdings_count",
+          "non_compliant_percentage",
+          "non_compliant_value",
+          "purification_unavailable_count",
+          "total_purification_amount",
+          "total_value"
+        ],
+        "type": "object"
+      },
+      "RatioStatusEnum": {
+        "description": "* `PASS` - PASS\n* `FAIL` - FAIL\n* `UNKNOWN` - UNKNOWN",
+        "enum": [
+          "PASS",
+          "FAIL",
+          "UNKNOWN"
+        ],
+        "type": "string"
+      },
+      "RatioStatuses": {
+        "description": "Whether each ratio passes its screen.",
+        "properties": {
+          "debt": {
+            "$ref": "#/components/schemas/RatioStatusEnum"
+          },
+          "impure_income": {
+            "$ref": "#/components/schemas/RatioStatusEnum"
+          },
+          "investment": {
+            "$ref": "#/components/schemas/RatioStatusEnum"
+          }
+        },
+        "required": [
+          "debt",
+          "impure_income",
+          "investment"
+        ],
+        "type": "object"
+      },
+      "RatioThresholds": {
+        "description": "Each ratio's screening limit, as a decimal string.",
+        "properties": {
+          "debt": {
+            "type": "string"
+          },
+          "impure_income": {
+            "type": "string"
+          },
+          "investment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "debt",
+          "impure_income",
+          "investment"
+        ],
+        "type": "object"
+      },
+      "ReasonEnum": {
+        "description": "* `TOTAL_ROW` - TOTAL_ROW\n* `SUBTOTAL_ROW` - SUBTOTAL_ROW\n* `PARENT_ROW` - PARENT_ROW\n* `MATURITY_SPLIT` - MATURITY_SPLIT\n* `NET_SUPERSEDED` - NET_SUPERSEDED\n* `DUPLICATE` - DUPLICATE\n* `UNKNOWN_LINE_ITEM` - UNKNOWN_LINE_ITEM\n* `NIL_OR_BLANK` - NIL_OR_BLANK\n* `MISSING_CITATION` - MISSING_CITATION\n* `NOT_PRINCIPAL` - NOT_PRINCIPAL\n* `EXCLUDED_BY_MODEL` - EXCLUDED_BY_MODEL\n* `NON_INTEREST` - NON_INTEREST\n* `RETURN_BASIS_UNKNOWN` - RETURN_BASIS_UNKNOWN\n* `RECEIVABLE` - RECEIVABLE\n* `POLICY_WORDING_ONLY` - POLICY_WORDING_ONLY\n* `MIXED_CASH` - MIXED_CASH\n* `NEGATIVE_BALANCE` - NEGATIVE_BALANCE\n* `CURRENCY_MISMATCH` - CURRENCY_MISMATCH\n* `OTHER` - OTHER",
+        "enum": [
+          "TOTAL_ROW",
+          "SUBTOTAL_ROW",
+          "PARENT_ROW",
+          "MATURITY_SPLIT",
+          "NET_SUPERSEDED",
+          "DUPLICATE",
+          "UNKNOWN_LINE_ITEM",
+          "NIL_OR_BLANK",
+          "MISSING_CITATION",
+          "NOT_PRINCIPAL",
+          "EXCLUDED_BY_MODEL",
+          "NON_INTEREST",
+          "RETURN_BASIS_UNKNOWN",
+          "RECEIVABLE",
+          "POLICY_WORDING_ONLY",
+          "MIXED_CASH",
+          "NEGATIVE_BALANCE",
+          "CURRENCY_MISMATCH",
+          "OTHER"
+        ],
+        "type": "string"
+      },
+      "Reconciliation": {
+        "description": "How the line-item total compares with the figure printed in the statement.",
+        "properties": {
+          "adjustments": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationAdjustment"
+            },
+            "type": "array"
+          },
+          "difference": {
+            "description": "Total used minus printed total.",
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "statement_total": {
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReconciliationStatusEnum"
+              }
+            ],
+            "description": "MATCHES; ADJUSTED (difference fully explained by the adjustments); UNRECONCILED (needs review); NO_STATEMENT_TOTAL.\n\n* `MATCHES` - MATCHES\n* `ADJUSTED` - ADJUSTED\n* `UNRECONCILED` - UNRECONCILED\n* `NO_STATEMENT_TOTAL` - NO_STATEMENT_TOTAL"
+          }
+        },
+        "required": [
+          "adjustments",
+          "difference",
+          "statement_total",
+          "status"
+        ],
+        "type": "object"
+      },
+      "ReconciliationAdjustment": {
+        "properties": {
+          "effect": {
+            "description": "Positive: added beyond the printed total. Negative: removed from it.",
+            "format": "decimal",
+            "nullable": true,
+            "pattern": "^-?\\d{0,26}(?:\\.\\d{0,6})?$",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "line_item": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "effect",
+          "label",
+          "line_item"
+        ],
+        "type": "object"
+      },
+      "ReconciliationStatusEnum": {
+        "description": "* `MATCHES` - MATCHES\n* `ADJUSTED` - ADJUSTED\n* `UNRECONCILED` - UNRECONCILED\n* `NO_STATEMENT_TOTAL` - NO_STATEMENT_TOTAL",
+        "enum": [
+          "MATCHES",
+          "ADJUSTED",
+          "UNRECONCILED",
+          "NO_STATEMENT_TOTAL"
+        ],
+        "type": "string"
+      },
+      "RegionList": {
+        "description": "The markets usable in the `region` filter.",
+        "properties": {
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/Exchange"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "regions"
+        ],
+        "type": "object"
+      },
+      "Report": {
+        "description": "A compliance report.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "date": {
+            "format": "date",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "download_url": {
+            "description": "Where to download the report; null when it has no file yet.",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "file_size": {
+            "readOnly": true,
+            "type": "integer"
+          },
+          "file_size_formatted": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "readOnly": true,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ReportTypeEnum"
+          }
+        },
+        "required": [
+          "created_at",
+          "date",
+          "description",
+          "download_url",
+          "file_size",
+          "file_size_formatted",
+          "id",
+          "title"
+        ],
+        "type": "object"
+      },
+      "ReportDownload": {
+        "description": "Where to download a report's PDF.",
+        "properties": {
+          "download_url": {
+            "description": "Null when the report has no file yet.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "file_size": {
+            "description": "Size in bytes.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "download_url",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object"
+      },
+      "ReportList": {
+        "description": "One page of compliance reports.",
+        "properties": {
+          "pagination": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportPagination"
+              }
+            ],
+            "description": "Missing when the list isn't paginated."
+          },
+          "reports": {
+            "items": {
+              "$ref": "#/components/schemas/Report"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "reports"
+        ],
+        "type": "object"
+      },
+      "ReportPagination": {
+        "properties": {
+          "current_page": {
+            "type": "integer"
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "has_previous": {
+            "type": "boolean"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "total_items": {
+            "type": "integer"
+          },
+          "total_pages": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "current_page",
+          "has_next",
+          "has_previous",
+          "per_page",
+          "total_items",
+          "total_pages"
+        ],
+        "type": "object"
+      },
+      "ReportSchedule": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "next_report_date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ReportScheduleTypeEnum"
+          }
+        },
+        "required": [
+          "description",
+          "next_report_date",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ReportScheduleTypeEnum": {
+        "description": "* `monthly` - monthly\n* `quarterly` - quarterly",
+        "enum": [
+          "monthly",
+          "quarterly"
+        ],
+        "type": "string"
+      },
+      "ReportStats": {
+        "description": "Report totals and the upcoming schedule.",
+        "properties": {
+          "report_schedule": {
+            "items": {
+              "$ref": "#/components/schemas/ReportSchedule"
+            },
+            "type": "array"
+          },
+          "total_downloads": {
+            "type": "integer"
+          },
+          "total_reports_generated": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "report_schedule",
+          "total_downloads",
+          "total_reports_generated"
+        ],
+        "type": "object"
+      },
+      "ReportTypeEnum": {
+        "description": "* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `special` - Special",
+        "enum": [
+          "monthly",
+          "quarterly",
+          "special"
+        ],
+        "type": "string"
+      },
+      "SecurityCompliance": {
+        "description": "A security's Shariah compliance. The purification fields appear on the list endpoints only.",
+        "properties": {
+          "exchange": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "purification_financial_year_end": {
+            "format": "date",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "purification_per_share": {
+            "description": "Naira to give away per share held at the financial year end.",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "purification_ratio": {
+            "description": "Impure share of revenue, on the same percent scale as *_revenue.\n\nNull for non-compliant securities (you avoid them, not purify them) and\nwhen revenue is missing.",
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "raw_symbol": {
+            "type": "string"
+          },
+          "report_date": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ComplianceStatusEnum"
+              }
+            ],
+            "readOnly": true
+          },
+          "symbol": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "exchange",
+          "name",
+          "purification_financial_year_end",
+          "purification_per_share",
+          "purification_ratio",
+          "raw_symbol",
+          "report_date",
+          "status",
+          "symbol"
+        ],
+        "type": "object"
+      },
+      "SecurityCompliancePage": {
+        "description": "One page of securities.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SecurityCompliance"
+            },
+            "type": "array"
+          },
+          "next_token": {
+            "description": "Cursor for the next page; null on the last page.",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "next_token"
+        ],
+        "type": "object"
+      },
+      "SecurityReport": {
+        "description": "A security's full compliance report, with its screens and ratios.",
+        "properties": {
+          "business_screen": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ComplianceStatusEnum"
+              }
+            ],
+            "readOnly": true
+          },
+          "business_screen_reason": {
+            "description": "Why the business-activity screen failed or is doubtful (null when it passes).",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "business_screen_reason_category": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BusinessScreenReasonCategoryEnum"
+              },
+              {
+                "$ref": "#/components/schemas/BlankEnum"
+              },
+              {
+                "$ref": "#/components/schemas/NullEnum"
+              }
+            ],
+            "readOnly": true
+          },
+          "compliant_revenue": {
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "debt_to_market_cap_ratio": {
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "exchange": {
+            "type": "string"
+          },
+          "filing": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FilingResultSummary"
+              }
+            ],
+            "nullable": true,
+            "readOnly": true
+          },
+          "financial_screen": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FinancialScreenEnum"
+              },
+              {
+                "$ref": "#/components/schemas/NullEnum"
+              }
+            ],
+            "readOnly": true
+          },
+          "impure_income_ratio": {
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "investment_to_market_cap_ratio": {
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "liquidity_to_market_cap_ratio": {
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "market_cap": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FilingMarketCap"
+              }
+            ],
+            "nullable": true,
+            "readOnly": true
+          },
+          "methodology_version": {
+            "description": "Version of the worker methodology behind the latest filing result.",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "non_compliant_revenue": {
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "provider_usage": {
+            "additionalProperties": {},
+            "readOnly": true,
+            "type": "object"
+          },
+          "questionable_revenue": {
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "ratios": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FilingRatios"
+              }
+            ],
+            "nullable": true,
+            "readOnly": true
+          },
+          "raw_symbol": {
+            "type": "string"
+          },
+          "report_date": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "screening_standard": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "sector": {
+            "type": "string"
+          },
+          "securities_to_market_cap_ratio": {
+            "format": "double",
+            "nullable": true,
+            "readOnly": true,
+            "type": "number"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ComplianceStatusEnum"
+              }
+            ],
+            "readOnly": true
+          },
+          "symbol": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "unresolved_inputs": {
+            "items": {
+              "type": "string"
+            },
+            "readOnly": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "business_screen",
+          "business_screen_reason",
+          "business_screen_reason_category",
+          "compliant_revenue",
+          "currency",
+          "debt_to_market_cap_ratio",
+          "exchange",
+          "filing",
+          "financial_screen",
+          "impure_income_ratio",
+          "investment_to_market_cap_ratio",
+          "liquidity_to_market_cap_ratio",
+          "market_cap",
+          "methodology_version",
+          "name",
+          "non_compliant_revenue",
+          "provider_usage",
+          "questionable_revenue",
+          "ratios",
+          "raw_symbol",
+          "report_date",
+          "screening_standard",
+          "sector",
+          "securities_to_market_cap_ratio",
+          "status",
+          "symbol",
+          "unresolved_inputs"
+        ],
+        "type": "object"
+      },
+      "SingleSecurityCompliance": {
+        "description": "A security's Shariah compliance, without the purification fields.",
+        "properties": {
+          "exchange": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "raw_symbol": {
+            "type": "string"
+          },
+          "report_date": {
+            "format": "date-time",
+            "nullable": true,
+            "readOnly": true,
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ComplianceStatusEnum"
+              }
+            ],
+            "readOnly": true
+          },
+          "symbol": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "exchange",
+          "name",
+          "raw_symbol",
+          "report_date",
+          "status",
+          "symbol"
+        ],
+        "type": "object"
+      },
+      "TierEnum": {
+        "description": "* `free` - free\n* `pro` - pro\n* `enterprise` - enterprise",
+        "enum": [
+          "free",
+          "pro",
+          "enterprise"
+        ],
+        "type": "string"
+      },
+      "TreatmentEnum": {
+        "description": "* `ADDED` - ADDED\n* `DEDUCTED` - DEDUCTED\n* `EXCLUDED` - EXCLUDED",
+        "enum": [
+          "ADDED",
+          "DEDUCTED",
+          "EXCLUDED"
+        ],
+        "type": "string"
+      },
+      "Usage": {
+        "description": "The API key's details, plan and usage today.",
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/UsageKey"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/UsagePlan"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/UsageLimits"
+          }
+        },
+        "required": [
+          "key",
+          "plan",
+          "usage"
+        ],
+        "type": "object"
+      },
+      "UsageKey": {
+        "properties": {
+          "is_active": {
+            "type": "boolean"
+          },
+          "last_used_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/ModeEnum"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "is_active",
+          "last_used_at",
+          "mode",
+          "name",
+          "prefix"
+        ],
+        "type": "object"
+      },
+      "UsageLimits": {
+        "properties": {
+          "daily_limit": {
+            "type": "integer"
+          },
+          "daily_remaining": {
+            "type": "integer"
+          },
+          "daily_used": {
+            "type": "integer"
+          },
+          "per_minute_limit": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "daily_limit",
+          "daily_remaining",
+          "daily_used",
+          "per_minute_limit"
+        ],
+        "type": "object"
+      },
+      "UsagePlan": {
+        "properties": {
+          "allows_export": {
+            "type": "boolean"
+          },
+          "allows_reports_access": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/TierEnum"
+          }
+        },
+        "required": [
+          "allows_export",
+          "allows_reports_access",
+          "name",
+          "tier"
+        ],
+        "type": "object"
+      },
+      "WorkerStatusEnum": {
+        "description": "* `COMPLIANT` - Compliant\n* `NON_COMPLIANT` - Non Compliant\n* `UNRATED` - Unrated",
+        "enum": [
+          "COMPLIANT",
+          "NON_COMPLIANT",
+          "UNRATED"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "description": "API key for external integrations. Format: sk_live_... or sk_test_...",
+        "in": "header",
+        "name": "X-API-Key",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "description": "API for Islamic finance compliance stock screening",
+    "title": "Shariah Stock Screener API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/etfs/compliance": {
+      "get": {
+        "description": "Paginated Shariah compliance for ETFs. Status and the holdings percentages are derived from the current compliance of each underlying holding, by fund weight.",
+        "operationId": "api_v1_etfs_compliance_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque pagination cursor",
+            "in": "query",
+            "name": "next_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Items per page (default 50, max 200)",
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "COMPLIANT, NON_COMPLIANT, or QUESTIONABLE",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ETFCompliancePage"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List ETF compliance",
+        "tags": [
+          "External API - ETFs"
+        ]
+      }
+    },
+    "/api/v1/exchanges": {
+      "get": {
+        "description": "Available exchanges/markets and their type (EXCHANGE or OTC).",
+        "operationId": "api_v1_exchanges_retrieve",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExchangeList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List exchanges",
+        "tags": [
+          "External API - Stocks"
+        ]
+      }
+    },
+    "/api/v1/portfolio/analyze": {
+      "post": {
+        "description": "Submit a list of stock holdings (ticker + shares) and receive portfolio-level compliance scoring, value breakdown by status, and per-holding purification amounts. Purification follows AAOIFI SS 21: the latest financial year's non-permissible income per share x shares (null when the annual statements are not screened yet).",
+        "operationId": "api_v1_portfolio_analyze_create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioAnalyzeRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioAnalyzeRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PortfolioAnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioAnalysis"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Analyze portfolio compliance",
+        "tags": [
+          "External API - Portfolio"
+        ]
+      }
+    },
+    "/api/v1/regions": {
+      "get": {
+        "description": "Available regions/markets (NGX, NASD) and their type (EXCHANGE or OTC).",
+        "operationId": "api_v1_regions_retrieve",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List regions",
+        "tags": [
+          "External API - Stocks"
+        ]
+      }
+    },
+    "/api/v1/reports": {
+      "get": {
+        "description": "Retrieve paginated list of compliance reports. Requires Pro or Enterprise plan.",
+        "operationId": "api_v1_reports_retrieve",
+        "parameters": [
+          {
+            "description": "Page number",
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Filter by report type: monthly, quarterly, special",
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List reports",
+        "tags": [
+          "External API - Reports"
+        ]
+      }
+    },
+    "/api/v1/reports/stats": {
+      "get": {
+        "description": "Get report generation and download statistics. Requires Pro or Enterprise plan.",
+        "operationId": "api_v1_reports_stats_retrieve",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportStats"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Report statistics",
+        "tags": [
+          "External API - Reports"
+        ]
+      }
+    },
+    "/api/v1/reports/{report_id}/download": {
+      "get": {
+        "description": "Get download URL for a specific report. Requires Enterprise plan.",
+        "operationId": "api_v1_reports_download_retrieve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDownload"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download report",
+        "tags": [
+          "External API - Reports"
+        ]
+      }
+    },
+    "/api/v1/stocks/compliance": {
+      "get": {
+        "description": "Paginated basic Shariah compliance for screened securities.",
+        "operationId": "api_v1_stocks_compliance_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque pagination cursor",
+            "in": "query",
+            "name": "next_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Items per page (default 50, max 200)",
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sector name (case-insensitive)",
+            "in": "query",
+            "name": "sector",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "COMPLIANT, NON_COMPLIANT, or QUESTIONABLE",
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityCompliancePage"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List securities compliance",
+        "tags": [
+          "External API - Stocks"
+        ]
+      }
+    },
+    "/api/v1/stocks/compliant": {
+      "get": {
+        "description": "Paginated list of securities with COMPLIANT status.",
+        "operationId": "api_v1_stocks_compliant_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque pagination cursor",
+            "in": "query",
+            "name": "next_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Items per page (default 50, max 200)",
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sector name (case-insensitive)",
+            "in": "query",
+            "name": "sector",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityCompliancePage"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List compliant securities",
+        "tags": [
+          "External API - Stocks"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/compliance": {
+      "get": {
+        "description": "Basic Shariah compliance status for one screened security.",
+        "operationId": "api_v1_stocks_compliance_retrieve_2",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleSecurityCompliance"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get security compliance",
+        "tags": [
+          "External API - Stocks"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/filings": {
+      "get": {
+        "description": "Newest first. Each item's `id` fetches that filing, its inputs and its evidence. Filter by `fiscal_period` and `fiscal_year`, e.g. `?fiscal_period=Q3&fiscal_year=2026`.",
+        "operationId": "api_v1_stocks_filings_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only filings for this period, as stated in the NGX filing title.",
+            "in": "query",
+            "name": "fiscal_period",
+            "schema": {
+              "enum": [
+                "FY",
+                "Q1",
+                "Q2",
+                "Q3",
+                "Q4"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only filings for this financial year, e.g. 2026.",
+            "in": "query",
+            "name": "fiscal_year",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingHistory"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List filing screening history",
+        "tags": [
+          "External API - Filings"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/filings/latest": {
+      "get": {
+        "description": "GET latest immutable worker filing identity and classification state.",
+        "operationId": "api_v1_stocks_filings_latest_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingResultSummary"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get latest screened filing",
+        "tags": [
+          "External API - Filings"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/filings/latest/evidence": {
+      "get": {
+        "description": "GET auditable extraction/retry provenance for the latest filing (Pro+).",
+        "operationId": "api_v1_stocks_filings_latest_evidence_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated extras. `ignored` adds the rows extraction returned but did not count.",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "enum": [
+                "ignored"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingEvidence"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get latest filing evidence",
+        "tags": [
+          "External API - Filings"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/filings/latest/inputs": {
+      "get": {
+        "description": "Each input carries its line-item breakdown: `basis`, `reconciliation` against the printed statement total, and the counted `lines`. Pass `include=ignored` to also list the rows that were not counted (subtotals, totals, maturity splits).",
+        "operationId": "api_v1_stocks_filings_latest_inputs_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated extras. `ignored` adds the rows extraction returned but did not count.",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "enum": [
+                "ignored"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingInputsResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get latest filing inputs and citations",
+        "tags": [
+          "External API - Filings"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/filings/{filing_id}": {
+      "get": {
+        "description": "GET one retained filing by id, latest or not (Pro+).",
+        "operationId": "api_v1_stocks_filings_retrieve_2",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "A filing `id` from the filing history.",
+            "in": "path",
+            "name": "filing_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingResultSummary"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get a screened filing",
+        "tags": [
+          "External API - Filings"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/filings/{filing_id}/evidence": {
+      "get": {
+        "description": "GET extraction provenance for one retained filing by id (Pro+).",
+        "operationId": "api_v1_stocks_filings_evidence_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "A filing `id` from the filing history.",
+            "in": "path",
+            "name": "filing_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated extras. `ignored` adds the rows extraction returned but did not count.",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "enum": [
+                "ignored"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingEvidence"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get a filing's evidence",
+        "tags": [
+          "External API - Filings"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/filings/{filing_id}/inputs": {
+      "get": {
+        "description": "Each input carries its line-item breakdown: `basis`, `reconciliation` against the printed statement total, and the counted `lines`. Pass `include=ignored` to also list the rows that were not counted (subtotals, totals, maturity splits).",
+        "operationId": "api_v1_stocks_filings_inputs_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "A filing `id` from the filing history.",
+            "in": "path",
+            "name": "filing_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated extras. `ignored` adds the rows extraction returned but did not count.",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "enum": [
+                "ignored"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingInputsResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get a filing's inputs and citations",
+        "tags": [
+          "External API - Filings"
+        ]
+      }
+    },
+    "/api/v1/stocks/{symbol}/report": {
+      "get": {
+        "description": "Full Shariah compliance report with screens and ratios. Requires Pro or Enterprise.",
+        "operationId": "api_v1_stocks_report_retrieve",
+        "parameters": [
+          {
+            "deprecated": true,
+            "description": "Deprecated alias of `region`.",
+            "in": "query",
+            "name": "exchange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Region/market code (NGX or NASD). Omit for both; on single-stock calls it disambiguates the symbol.",
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityReport"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get full compliance report",
+        "tags": [
+          "External API - Stocks"
+        ]
+      }
+    },
+    "/api/v1/usage": {
+      "get": {
+        "description": "Returns current usage stats, rate limits, and plan info for the authenticated API key.",
+        "operationId": "api_v1_usage_retrieve",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usage"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get API key usage",
+        "tags": [
+          "External API - Usage"
+        ]
+      }
+    }
+  }
+}
