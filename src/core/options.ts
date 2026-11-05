@@ -4,6 +4,8 @@ import { isBrowserLike, readEnv } from './runtime';
 export const DEFAULT_BASE_URL = 'https://api.toyyib.app/api/v1';
 export const DEFAULT_TIMEOUT_MS = 60_000;
 export const DEFAULT_MAX_RETRIES = 2;
+/** setTimeout fires at once for longer delays, so this is the longest timeout. */
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 
 export interface ClientOptions {
   /** Defaults to the `TOYYIB_API_KEY` environment variable. */
@@ -55,15 +57,32 @@ export function resolveOptions(options: ClientOptions = {}): ResolvedOptions {
     );
   }
 
+  const timeout = options.timeout ?? DEFAULT_TIMEOUT_MS;
+  if (!Number.isFinite(timeout) || timeout < 1 || timeout > MAX_TIMEOUT_MS) {
+    throw invalidOption(
+      `\`timeout\` must be a number of milliseconds from 1 to ${MAX_TIMEOUT_MS}.`,
+    );
+  }
+
+  // NaN here would make the retry loop never end.
+  const maxRetries = options.maxRetries ?? DEFAULT_MAX_RETRIES;
+  if (!Number.isInteger(maxRetries) || maxRetries < 0) {
+    throw invalidOption('`maxRetries` must be a whole number, 0 or more.');
+  }
+
   return {
     apiKey,
     baseURL,
-    timeout: options.timeout ?? DEFAULT_TIMEOUT_MS,
-    maxRetries: options.maxRetries ?? DEFAULT_MAX_RETRIES,
+    timeout,
+    maxRetries,
     // Calls the global at request time: a stored, unbound fetch throws
     // "Illegal invocation" in browsers and Cloudflare Workers.
     fetch: options.fetch ?? ((input, init) => globalThis.fetch(input, init)),
   };
+}
+
+function invalidOption(message: string): ToyyibError {
+  return new ToyyibError(message, { code: 'INVALID_OPTION' });
 }
 
 // `new URL('localhost:8000')` parses, with `localhost:` as the scheme, so the

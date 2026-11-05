@@ -90,6 +90,41 @@ describe('resolveOptions', () => {
     );
   });
 
+  // NaN would make the retry loop never end; Infinity or more than 2^31 - 1 ms
+  // makes setTimeout fire at once, so every request would time out.
+  it.each([NaN, -1, 1.5, Infinity])(
+    'throws INVALID_OPTION for maxRetries %s',
+    (maxRetries) => {
+      const err = thrownBy(() =>
+        resolveOptions({ apiKey: 'sk_test_x', maxRetries }),
+      );
+      expect(err.code).toBe('INVALID_OPTION');
+      expect(err.message).toContain('maxRetries');
+    },
+  );
+
+  it.each([NaN, 0, -5, Infinity, 2 ** 31])(
+    'throws INVALID_OPTION for timeout %s',
+    (timeout) => {
+      const err = thrownBy(() =>
+        resolveOptions({ apiKey: 'sk_test_x', timeout }),
+      );
+      expect(err.code).toBe('INVALID_OPTION');
+      expect(err.message).toContain('timeout');
+    },
+  );
+
+  it('accepts the smallest and largest valid values', () => {
+    const resolved = resolveOptions({
+      apiKey: 'sk_test_x',
+      maxRetries: 0,
+      timeout: 2 ** 31 - 1,
+    });
+    expect(resolved.maxRetries).toBe(0);
+    expect(resolved.timeout).toBe(2 ** 31 - 1);
+    expect(resolveOptions({ apiKey: 'sk_test_x', timeout: 1 }).timeout).toBe(1);
+  });
+
   it('uses the defaults', () => {
     const resolved = resolveOptions({ apiKey: 'sk_test_x' });
     expect(resolved.baseURL).toBe(DEFAULT_BASE_URL);
